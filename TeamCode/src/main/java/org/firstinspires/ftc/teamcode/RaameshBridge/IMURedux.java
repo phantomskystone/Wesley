@@ -8,7 +8,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
-import org.firstinspires.ftc.teamcode.PhantomConfig4200X;
+import org.firstinspires.ftc.teamcode.RaameshBridge.PhantomConfig4200X;
 
 public class IMURedux extends MecanumRedux2 {
 
