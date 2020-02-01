@@ -1,11 +1,13 @@
-package org.firstinspires.ftc.teamcode.RaameshBridge;
+package org.firstinspires.ftc.teamcode.RunnableProgramsAndMore;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
+import org.firstinspires.ftc.teamcode.RaameshBridge.IMURedux;
 import org.firstinspires.ftc.teamcode.RaameshBridge.PhantomConfig4200X;
 import org.firstinspires.ftc.teamcode.RaameshBridge.proto.BlueAuto;
 
-@Autonomous(name="BLUE FoundationSide (Ends Away From Wall)",group="autonomous")
+
+@Autonomous(name="BlueFoundationSide (Ends Away From Wall)",group="autonomous")
 public final class BridgeIMUBlue2XRaameshPosB extends BlueAuto {
 
     PhantomConfig4200X robot = new PhantomConfig4200X();
@@ -16,40 +18,73 @@ public final class BridgeIMUBlue2XRaameshPosB extends BlueAuto {
 
         super.d();
 
+        //Init Robot
+
         robot.startShip(hardwareMap);
-        //robot.doIMU();
-        //robot.reverse();
-        //robot.doNewC();
+
+        // Calibrate Imu
+
         MecanumInstance.calibrate();
-        //robot.skyServo.setPosition(0);
+
+        // Make sure the foundation servo is in the right position before start.
+
         robot.armServo.setPosition(1);
+
+        //Wait until Start is pressed
+
         waitForStart();
+
+        //Raise Foundation arm
+
         robot.armServo.setPosition(0.7);
-        MecanumInstance.imuDrive(0,1/3.333333333333333*10/7,0.7);
-        MecanumInstance.imuDrive(-90,0.6*10/7,0.7);
-        MecanumInstance.imuDrive(0,(0.9*10/7)-0.1,0.7);
-        MecanumInstance.imuDrive(0,0.04,1*0.7);
-        //sleep(3000);
-        telemetry.addData("STATUS:", "PAUSING");
-        telemetry.update();
+
+        // Drive Forward to clear the wall
+
+        MecanumInstance.imuDrive(0,0.2f,0.3f);
+
+        // Strafe to align to the foundation
+
+        MecanumInstance.imuDrive(-90,1.2f,0.5f);
+
+        // Move to foundation
+
+        MecanumInstance.imuDrive(0,1.8f,0.5f);
+        MecanumInstance.imuDrive(0,0.533333333f,0.3f);
+
+        //Grab the foundation
+
         robot.armServo.setPosition(1);
-        sleep(3000);
-        MecanumInstance.imuDrive(0,(1.225*10/7)-0.1,-1*0.7);
         sleep(500);
+
+        //Back up
+
+        MecanumInstance.imuDrive(0,1.4f,-0.5f);
+        sleep(500);
+
+        //Turn the foundation and the robot
 
         MecanumInstance.imuTurn(90,1.8);
 
-        robot.armServo.setPosition(0.7);
         sleep(3000);
 
-        MecanumInstance.imuDrive(0,0.245*10/7,1*0.7);
+        //Let go of the foundation
 
-        MecanumInstance.imuDrive(180,0.4*10/7,1*0.7);
+        robot.armServo.setPosition(0.7);
+        sleep(500);
 
-        MecanumInstance.imuDrive(90,((0.625*7/10)*10/7)+0.875,0.7);
+        //Push the foundation forwards
 
+        MecanumInstance.imuDrive(0,0.35f,0.7f);
 
-        //   MecanumInstance.imuDrive(90,3,0.5f);
-        MecanumInstance.imuDrive(180,(1.6*10/7*2/3)-0.32,0.7);
+        //Back up
+
+        MecanumInstance.imuDrive(180,1f,0.4f);
+
+        sleep(1000);
+
+        //Get under the alliance bridge
+
+        MecanumInstance.imuDrive(180,2f,0.4f);
+
     }
 }
