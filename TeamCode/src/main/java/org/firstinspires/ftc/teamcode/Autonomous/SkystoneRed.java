@@ -297,7 +297,7 @@ public class SkystoneRed extends LinearOpMode
             robot.backRight.setPower(0.5);
         }
 
-        while(robot.getAngle() > 90 && opModeIsActive()) {
+        while(robot.getAngle() < -90 && opModeIsActive()) {
             robot.frontLeft.setPower(0.7);
             robot.frontRight.setPower(-0.3);
             robot.backLeft.setPower(0.7);

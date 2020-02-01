@@ -2,8 +2,8 @@ package org.firstinspires.ftc.teamcode.RaameshBridge.proto;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-import org.firstinspires.ftc.teamcode.MecanumConfig;
-import org.firstinspires.ftc.teamcode.RunnableProgramsAndMore.MecanumRedux2;
+import org.firstinspires.ftc.teamcode.RaameshBridge.MecanumConfig;
+import org.firstinspires.ftc.teamcode.RaameshBridge.MecanumRedux2;
 
 public class DebugMotion {
     
