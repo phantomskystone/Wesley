@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.RunnableProgramsAndMore;
+package org.firstinspires.ftc.teamcode.RaameshBridge;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
@@ -8,7 +8,7 @@ import org.firstinspires.ftc.teamcode.RaameshBridge.PhantomConfig4200X;
 import org.firstinspires.ftc.teamcode.RaameshBridge.proto.RedAuto;
 
 
-@Autonomous(name="RedFoundationSide (Ends Close To Wall)",group="autonomous")
+@Autonomous(name="RED Foundation",group="autonomous")
 public final class BridgeIMU2XRaamesh extends RedAuto {
 
     PhantomConfig4200X robot = new PhantomConfig4200X();
@@ -29,7 +29,7 @@ public final class BridgeIMU2XRaamesh extends RedAuto {
         waitForStart();
         robot.armServo.setPosition(0.7);
         MecanumInstance.imuDrive(0,0.2f,0.3f);
-        MecanumInstance.imuDrive(-90,1.2f,0.5f);
+        MecanumInstance.imuDrive(-90,1.45f,0.6f);
         MecanumInstance.imuDrive(0,1.8f,0.5f);
         MecanumInstance.imuDrive(0,0.533333333f,0.3f);
         robot.armServo.setPosition(1);
@@ -46,7 +46,7 @@ public final class BridgeIMU2XRaamesh extends RedAuto {
 
         MecanumInstance.imuDrive(180,1f,0.4f);
 
-        MecanumInstance.imuDrive(-90,0.625,0.7);
+        MecanumInstance.imuDrive(-90,1.75,0.7);
 
         //   MecanumInstance.imuDrive(90,3,0.5f);
         MecanumInstance.imuDrive(180,2f,0.4f);

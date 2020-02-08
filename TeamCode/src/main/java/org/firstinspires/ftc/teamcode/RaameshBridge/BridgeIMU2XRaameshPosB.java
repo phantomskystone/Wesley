@@ -1,6 +1,7 @@
-package org.firstinspires.ftc.teamcode.RunnableProgramsAndMore;
+package org.firstinspires.ftc.teamcode.RaameshBridge;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 
 import org.firstinspires.ftc.teamcode.RaameshBridge.IMURedux;
@@ -11,6 +12,7 @@ import org.firstinspires.ftc.teamcode.RaameshBridge.proto.RedAuto;
 //Commented by Raamesh Balabharapatruni
 
 @SuppressWarnings("MagicConstant")
+@Disabled
 @Autonomous(name="RedFoundationSide (Ends Away From Wall)",group="autonomous")
 public final class BridgeIMU2XRaameshPosB extends RedAuto {
 

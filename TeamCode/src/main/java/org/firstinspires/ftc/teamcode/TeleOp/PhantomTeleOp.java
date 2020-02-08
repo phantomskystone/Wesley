@@ -32,10 +32,28 @@ public class PhantomTeleOp extends LinearOpMode {
 
         robot.init(hardwareMap);
 
-        robot.frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        robot.frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        robot.backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        robot.backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+//        robot.frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+//        robot.frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+//        robot.backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+//        robot.backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        Thread drivetrain = new Thread() {
+            @Override
+            public void run() {
+                while(opModeIsActive()) {
+                    side = (gamepad1.left_stick_x + gamepad1.right_stick_x) / -2;
+                    frontRight = -gamepad1.right_stick_y + side;
+                    backRight = -gamepad1.right_stick_y - side;
+                    frontLeft = -gamepad1.left_stick_y - side;
+                    backLeft = -gamepad1.left_stick_y + side;
+
+                    robot.frontLeft.setPower(frontLeft*power);
+                    robot.frontRight.setPower(frontRight*power);
+                    robot.backLeft.setPower(backLeft*power);
+                    robot.backRight.setPower(backRight*power);
+                }
+            }
+        };
 
         robot.lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         robot.lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -46,6 +64,8 @@ public class PhantomTeleOp extends LinearOpMode {
         robot.lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         robot.startPositionTracking();
+
+        drivetrain.start();
 
         while (!isStopRequested()) {
             if (gamepad1.right_bumper && !pressed && power < 1) {
@@ -63,28 +83,17 @@ public class PhantomTeleOp extends LinearOpMode {
 
             telemetry.addData("Power:", power);
 
-            side = (gamepad1.left_stick_x + gamepad1.right_stick_x) / -2;
-            frontRight = -gamepad1.right_stick_y + side;
-            backRight = -gamepad1.right_stick_y - side;
-            frontLeft = -gamepad1.left_stick_y - side;
-            backLeft = -gamepad1.left_stick_y + side;
-
-            robot.frontLeft.setPower(frontLeft*power);
-            robot.frontRight.setPower(frontRight*power);
-            robot.backLeft.setPower(backLeft*power);
-            robot.backRight.setPower(backRight*power);
-
             robot.intake1.setPower((gamepad1.left_trigger - gamepad1.right_trigger)*0.75);
             robot.intake2.setPower((gamepad1.left_trigger - gamepad1.right_trigger)*0.75);
 
             if(robot.lift.getCurrentPosition() > -10 && -gamepad2.right_stick_y < 0) {
                 lift = -gamepad2.right_stick_y/4;
             }
-            else if((robot.lift.getCurrentPosition() < 640 && -gamepad2.right_stick_y > 0)) {
+            else if((robot.lift.getCurrentPosition() < 700 && -gamepad2.right_stick_y > 0)) {
                 lift = -gamepad2.right_stick_y;
             } else if (robot.lift.getCurrentPosition() < -20) {
                 lift = 0.1;
-            } else if (robot.lift.getCurrentPosition() > 640) {
+            } else if (robot.lift.getCurrentPosition() > 700) {
                 lift = -0.1;
             } else {
                 lift = 0;
@@ -99,7 +108,7 @@ public class PhantomTeleOp extends LinearOpMode {
                 }
             }
 
-            if(position < 0.24) {
+            if(position < 0.28) {
                 grip = false;
             } else {
                 grip = true;
@@ -125,10 +134,10 @@ public class PhantomTeleOp extends LinearOpMode {
                 robot.foundationServo.setPosition(0.3);
             }
 
-            robot.leftBase.setPosition(-(Math.abs(position-0.24)+0.24) + 1);
-            robot.rightBase.setPosition((Math.abs(position-0.24)+0.24));
-            robot.leftStabilization.setPosition((Math.abs(position-0.24)+0.24)*1.13 - 0.07);
-            robot.rightStabilization.setPosition(-(Math.abs(position-0.24)+0.24)*1.13 + 1.07);
+            robot.leftBase.setPosition(-(Math.abs(position-0.28)+0.28) + 1);
+            robot.rightBase.setPosition((Math.abs(position-0.28)+0.28));
+            robot.leftStabilization.setPosition((Math.abs(position-0.28)+0.28)*1.13 - 0.07);
+            robot.rightStabilization.setPosition(-(Math.abs(position-0.28)+0.28)*1.13 + 1.07);
 
 
 

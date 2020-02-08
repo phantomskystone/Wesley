@@ -53,4 +53,21 @@ public class Point {
         Point newPoint = new Point(this.x-point.x, this.y-point.y);
         return newPoint;
     }
+
+    public boolean isBetween(Point point1, Point point2) {
+        boolean xIsBetween = false;
+        boolean yIsBetween = false;
+        if ((x <= point1.x && x >= point2.x) || (x >= point1.x && x <= point2.x)) {
+            xIsBetween = true;
+        }
+        if ((y <= point1.y && y >= point2.y) || (y >= point1.y && y <= point2.y)) {
+            yIsBetween = true;
+        }
+        if (xIsBetween && yIsBetween) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
 }

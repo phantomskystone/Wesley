@@ -1,22 +1,27 @@
 package org.firstinspires.ftc.teamcode.Robot;
 
+import java.util.ArrayList;
+import static java.lang.Math.*;
+
 public class Line {
 
     double intercept;
     double slope;
 
-    double interceptX;
-    boolean vertical;
+    public static double vertical = 100000;
+
 
     public Line(double slope, double intercept) {
         this.slope = slope;
         this.intercept = intercept;
     }
     public Line(Point point1, Point point2) {
-        if(point1.x != point2.x) {
+        if(point1.x == point2.x) {
+            slope = vertical;
+        } else {
             slope = (point2.y - point1.y) / (point2.x - point1.x);
-            intercept = point1.y - (point1.x * slope);
         }
+        intercept = point1.y - (point1.x * slope);
     }
     public Line(Point point, double slope) {
         this.slope = slope;
@@ -28,21 +33,32 @@ public class Line {
         this.intercept = intercept;
     }
     public void setLine(Point point1, Point point2) {
-        if(point1.x != point2.x) {
-            slope = (point2.y - point1.y) / (point2.x - point1.x);
-            intercept = point1.y - (point1.x * slope);
+        if(point1.x == point2.x) {
+            slope = vertical;
         } else {
-            vertical = true;
-            interceptX = point1.x;
+            slope = (point2.y - point1.y) / (point2.x - point1.x);
         }
+        intercept = point1.y - (point1.x * slope);
     }
     public void setLine(Point point, double slope) {
         this.slope = slope;
         intercept = point.y - (point.x * slope);
     }
-    public void setVerticalLine(double xIntercept) {
-        interceptX = xIntercept;
-        vertical = true;
+
+    public Line perpendicularThrough(Point point) {
+        Line newLine;
+
+        if (slope != 0 && slope != vertical) {
+            newLine = new Line(point, -1 / slope);
+        } else if (slope == 0) {
+            newLine = new Line(point, vertical);
+        } else if (slope == vertical) {
+            newLine = new Line(point, 0);
+        } else {
+            newLine = null;
+        }
+
+        return newLine;
     }
 
     public Point intersection(Line line) {
@@ -54,31 +70,43 @@ public class Line {
         x(a - c) = d - b
         x = (d - b) / (a - c)
          */
-        if(this.slope != line.slope || this.vertical || line.vertical) {
+        if(this.slope != line.slope) {
             double x;
             double y;
 
-            if(!this.vertical && !line.vertical) {
-                x = (intercept - line.intercept) / (line.slope - slope);
-                y = slope * x + intercept;
-            }
-            else if(this.vertical) {
-                x = this.interceptX;
-                y = line.intercept + line.slope * x;
-            }
-            else if(line.vertical) {
-                x = line.interceptX;
-                y = this.intercept + this.slope * x;
-            } else {
-                x=0;
-                y=0;
-            }
+            x = (intercept - line.intercept) / (line.slope - slope);
+            y = slope * x + intercept;
 
-            Point point = new Point(x, y);
-            return point;
+            return new Point(x,y);
 
         } else {
             return null;
+        }
+    }
+
+    public Point closestToPoint(Point point) {
+        return intersection(perpendicularThrough(point));
+    }
+
+    //x=-2mb+- 2sqrt(-b2+r2m2+r2)  /  2m2+2
+
+    public Point pointAtDistance (Point point, Point towards, double radius) {
+        ArrayList<Point> points = new ArrayList<>();
+        Point opt1 = new Point();
+        Point opt2 = new Point();
+        double a = pow(slope,2)+1;
+        double b = 2*slope*intercept;
+        double c = pow(intercept,2)-pow(radius,2);
+        opt1.setX((-b+sqrt(pow(b,2)-(4*a*c)))/(2*a));
+        opt1.setY(intercept+slope*opt1.x);
+        opt2.setX((-b-sqrt(pow(b,2)-(4*a*c)))/(2*a));
+        opt2.setY(intercept+slope*opt2.x);
+        if(hypot(opt1.subtract(towards).x, opt1.subtract(towards).y) < hypot(opt2.subtract(towards).x, opt2.subtract(towards).y)) {
+            return opt1;
+        } else if (hypot(opt1.subtract(towards).x, opt1.subtract(towards).y) > hypot(opt2.subtract(towards).x, opt2.subtract(towards).y)) {
+            return opt2;
+        } else {
+            return new Point(0,0);
         }
     }
 }
