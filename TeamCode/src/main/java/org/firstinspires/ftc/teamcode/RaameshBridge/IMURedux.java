@@ -262,4 +262,33 @@ public class IMURedux extends MecanumRedux2 {
 
         gain = IMUg;
     }
+    public void imuTurn (double angle, double maxTime,boolean xy) {
+        robot.globalAngle = -angle;
+
+        gain = 0.0125f;
+
+        ElapsedTime time = new ElapsedTime();
+
+        time.reset();
+
+        double x = 0;
+
+        while (!e.isStopRequested() && time.seconds() <= maxTime) {
+            robot.frontRight.setPower(-checkDirection());
+            robot.frontLeft.setPower(checkDirection());
+            robot.backRight.setPower(-checkDirection());
+            robot.backLeft.setPower(checkDirection());
+            x += 0.05;
+            if (time.seconds() > x) {
+                gain += 0.003;
+            }
+        }
+
+        robot.backLeft.setPower(0);
+        robot.frontLeft.setPower(0);
+        robot.backRight.setPower(0);
+        robot.frontRight.setPower(0);
+
+        gain = IMUg;
+    }
 }

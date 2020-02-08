@@ -10,7 +10,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.teamcode.Robot.Drive;
 import org.firstinspires.ftc.teamcode.Robot.Point;
 import org.firstinspires.ftc.teamcode.AutoSide.Auto;
-
+@Disabled
 @Autonomous(name="holo", group="bests")
 
 public class basic_oton extends LinearOpMode {

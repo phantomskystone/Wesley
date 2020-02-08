@@ -1,12 +1,13 @@
-package org.firstinspires.ftc.teamcode.RunnableProgramsAndMore;
+package org.firstinspires.ftc.teamcode.RaameshBridge;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.teamcode.RaameshBridge.IMURedux;
 import org.firstinspires.ftc.teamcode.RaameshBridge.PhantomConfig4200X;
 import org.firstinspires.ftc.teamcode.RaameshBridge.proto.BlueAuto;
 
-
+@Disabled
 @Autonomous(name="BlueFoundationSide (Ends Away From Wall)",group="autonomous")
 public final class BridgeIMUBlue2XRaameshPosB extends BlueAuto {
 
@@ -44,7 +45,7 @@ public final class BridgeIMUBlue2XRaameshPosB extends BlueAuto {
 
         // Strafe to align to the foundation
 
-        MecanumInstance.imuDrive(-90,1.2f,0.5f);
+        MecanumInstance.imuDrive(-90,1.7f,0.5f);
 
         // Move to foundation
 
@@ -58,12 +59,16 @@ public final class BridgeIMUBlue2XRaameshPosB extends BlueAuto {
 
         //Back up
 
-        MecanumInstance.imuDrive(0,1.4f,-0.5f);
+        MecanumInstance.imuDrive(0,0.4f,-0.5f);
         sleep(500);
 
         //Turn the foundation and the robot
 
-        MecanumInstance.imuTurn(90,1.8);
+        MecanumInstance.imuTurn(20,0.2,false);
+
+        MecanumInstance.imuDrive(180,1,0.7);
+
+        MecanumInstance.imuTurn(70,1.6,false);
 
         sleep(3000);
 
@@ -84,7 +89,7 @@ public final class BridgeIMUBlue2XRaameshPosB extends BlueAuto {
 
         //Get under the alliance bridge
 
-        MecanumInstance.imuDrive(180,2f,0.4f);
+        MecanumInstance.imuDrive(180,2.4f,0.4f);
 
     }
 }
