@@ -178,7 +178,7 @@ public class Drive extends Config {
         double powX = cos(angle);
         double powY = sin(angle) * 0.85;
 
-        double maximizer = power / (abs(powX) + abs(powY));
+        double maximizer = power / (abs(powX) + abs(powY) + abs(checkDirection()));
 
         frontLeft.setPower(maximizer*(powY + powX) + checkDirection());
         frontRight.setPower(maximizer*(powY - powX) - checkDirection());
@@ -187,6 +187,8 @@ public class Drive extends Config {
     }
 
     int currentPoint = 0;
+    public static double dynamicAngle;
+    public static double adjustedPower;
 
     public void runPath(Path pointList, double power, double drift) {
         motorsOn();
@@ -197,8 +199,10 @@ public class Drive extends Config {
         Point target = new Point(0,0);
         Point stopPoint = new Point(0,0);
 
-        Line pathLine = new Line(0, 0);
-        Line robotLine = new Line(0, 0);
+        Line pathLine = new Line(0,0);
+        Line robotLine;
+
+        Line relativeLine = new Line(0,0);
 
         currentPoint = 0;
 
@@ -209,6 +213,9 @@ public class Drive extends Config {
         Point realErrorPoint = new Point(0,0);
         double error;
         double realError;
+
+        dynamicAngle = 0;
+        adjustedPower = power;
 
         pointOne.setPoint(robot);
         pointTwo.setPoint(pointList.get(0));
@@ -221,8 +228,20 @@ public class Drive extends Config {
 
             stopPoint.setPoint(0.5 * velX * drift, 0.5 * velY * drift);
 
-            target.setPoint(new Line(pointOne.subtract(robot), pointTwo.subtract(robot)).pointAtDistance(robot, pointTwo, 15));
-            target.subtract(new Point(2,2));
+            relativeLine.setLine(pointOne.subtract(robot), pointTwo.subtract(robot));
+
+            for (Point out : relativeLine.pointAtDistance(robot, pointTwo, drift)) {
+                opMode.telemetry.addData("out x", out.x);
+                opMode.telemetry.addData("out y", out.y);
+            }
+
+            if (relativeLine.pointAtDistance(robot, pointTwo, drift).get(0).distanceTo(pointTwo.subtract(robot)) <
+                    relativeLine.pointAtDistance(robot, pointTwo, drift).get(1).distanceTo(pointTwo.subtract(robot))) {
+                target.setPoint(relativeLine.pointAtDistance(robot, pointTwo, drift).get(0));
+            } else {
+                target.setPoint(relativeLine.pointAtDistance(robot, pointTwo, drift).get(1));
+            }
+
             target = target.add(robot);
 
             errorPoint = target.subtract(robot);
@@ -235,15 +254,24 @@ public class Drive extends Config {
                 //target = target.add(crossDist);
             }
 
+
             if (pointTwo.hasAngle) {
                 setAngle = pointTwo.angle;
+            } else if (pointTwo.hasDynamicAngle) {
+                dynamicAngle = pointTwo.dynamicAngle;
+                setAngle = -toDegrees(atan2(errorPoint.y, errorPoint.x))+90 + pointTwo.dynamicAngle;
             } else {
-                setAngle = -toDegrees(atan2(errorPoint.y, errorPoint.x))+90;
+                setAngle = -toDegrees(atan2(errorPoint.y, errorPoint.x))+90 + dynamicAngle;
+            }
+            if (pointTwo.hasPower) {
+                adjustedPower = pointTwo.power;
             }
 
-            pointDrive(target, power);
+            pointDrive(target, adjustedPower);
 
-            opMode.telemetry.addData("cross", error);
+            opMode.telemetry.addData("da", dynamicAngle);
+            opMode.telemetry.addData("p2", pointTwo.x);
+            opMode.telemetry.addData("p2", pointTwo.y);
             opMode.telemetry.addData("target", target.x);
             opMode.telemetry.addData("target", target.y);
             opMode.telemetry.addData("current point", currentPoint);
@@ -253,7 +281,7 @@ public class Drive extends Config {
             opMode.telemetry.update();
             runtime.reset();
 
-            if (realError < 15) {
+            if (realError < drift) {
                 if (currentPoint == pointList.length() - 1) {
                     driving = false;
                 } else {
@@ -274,11 +302,22 @@ public class Drive extends Config {
 
         while(!(pow(robot.x - pointTwo.x, 2) + pow(robot.y - pointTwo.y, 2) < 1) && !opMode.isStopRequested()
                 && !Thread.interrupted() && runtime.seconds() < 1) {
+
+            if (pointTwo.hasDynamicAngle) {
+                dynamicAngle = pointTwo.angle;
+                setAngle = -toDegrees(atan2(errorPoint.y, errorPoint.x))+90 + pointTwo.dynamicAngle;
+            } else if (pointTwo.hasAngle) {
+                setAngle = pointTwo.angle;
+            }
+
             errX = robot.x - pointTwo.x;
             errY = robot.y - pointTwo.y;
-            finishPower = sqrt(pow(errX, 2) + pow(errY, 2)) / 60;
+            finishPower = sqrt(pow(errX, 2) + pow(errY, 2)) / 40;
             if (finishPower > power) {
                 finishPower = power;
+            }
+            if (!pointTwo.hasAngle) {
+                setAngle = -toDegrees(atan2(pointTwo.subtract(pointOne).y, pointTwo.subtract(pointOne).x)) + 90 + dynamicAngle;
             }
             pointDrive(pointTwo, finishPower);
         }
@@ -301,29 +340,19 @@ public class Drive extends Config {
     //IMU angle correction methods
 
     public double checkDirection() {
-        double angles = toDegrees(-currentAngle + PI/2);
 
-        double deltaAngle = angles - lastAngles;
-
-        if (deltaAngle < -180) {
-            deltaAngle += 360;
-        } else if (deltaAngle > 180) {
-            deltaAngle -= 360;
-        }
-        checkAngle += deltaAngle;
-
-        lastAngles = angles;
-
-
-        // The gain value determines how sensitive the correction is to direction changes.
-        // You will have to experiment with your robot to get small smooth direction changes
-        // to stay on a straight line.
         double correction;
         double gain = 0.015;
 
-        //gain = mult * angle;
+        double angles = toDegrees(-currentAngle + PI/2) % 360;
 
-        correction = -(checkAngle-setAngle) * gain;        // reverse sign of angle for correction.
+        correction = setAngle%360 - angles;
+
+        if (abs(correction) > 180) {
+            correction -= 360;
+        }
+
+        correction *= gain;
 
         return correction;
     }

@@ -23,19 +23,17 @@ package org.firstinspires.ftc.teamcode.Autonomous;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.robot.Robot;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.Robot.Drive;
 import org.firstinspires.ftc.teamcode.Robot.Path;
+import org.firstinspires.ftc.teamcode.Robot.Point.AngleType;
 import org.firstinspires.ftc.teamcode.Robot.Runner;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfInt;
 import org.opencv.core.MatOfPoint;
-import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.RotatedRect;
@@ -45,17 +43,20 @@ import org.opencv.imgproc.Imgproc;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
-import org.openftc.easyopencv.OpenCvInternalCamera;
 import org.openftc.easyopencv.OpenCvPipeline;
-import org.firstinspires.ftc.teamcode.Robot.Point.AngleType;
-import static java.lang.Math.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-@Autonomous(name="cv skystone")
-public class stone extends LinearOpMode
+import static java.lang.Math.abs;
+import static java.lang.Math.atan;
+import static java.lang.Math.sin;
+import static java.lang.Math.tan;
+import static java.lang.Math.toRadians;
+
+@Autonomous(name="cv skystone blue")
+public class stoneBlue extends LinearOpMode
 {
     Drive robot = new Drive(this);
     Runner runner = new Runner(robot);
@@ -448,7 +449,7 @@ public class stone extends LinearOpMode
              */
 
             distance = tan(atan((120 - Skystone.x - Skystone.width) / focalLength) + toRadians(cameraAngle)) * cameraHeight;
-            translation = ((160 - StonePos.y) / focalLength) * distance * 1.1 + 2;
+            translation = ((160 - StonePos.y) / focalLength) * distance * 1.1 - 2;
 
 
             telemetry.addData("Stone Position X", StonePos.x);

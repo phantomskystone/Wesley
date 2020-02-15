@@ -156,49 +156,7 @@ public class SkystoneRed extends LinearOpMode
              */
             if(runtime.seconds() > 3)
             {
-                /*
-                 * IMPORTANT NOTE: calling stopStreaming() will indeed stop the stream of images
-                 * from the camera (and, by extension, stop calling your vision pipeline). HOWEVER,
-                 * if the reason you wish to stop the stream early is to switch use of the camera
-                 * over to, say, Vuforia or TFOD, you will also need to call closeCameraDevice()
-                 * (commented out below), because according to the Android Camera API documentation:
-                 *         "Your application should only have one Camera object active at a time for
-                 *          a particular hardware camera."
-                 *
-                 * NB: calling closeCameraDevice() will internally call stopStreaming() if applicable,
-                 * but it doesn't hurt to call it anyway, if for no other reason than clarity.
-                 *
-                 * NB2: if you are stopping the camera stream to simply save some processing power
-                 * (or battery power) for a short while when you do not need your vision pipeline,
-                 * it is recommended to NOT call closeCameraDevice() as you will then need to re-open
-                 * it the next time you wish to activate your vision pipeline, which can take a bit of
-                 * time. Of course, this comment is irrelevant in light of the use case described in
-                 * the above "important note".
-                 */
-                webCam.stopStreaming();
-                webCam.closeCameraDevice();
                 break;
-            }
-
-            /*
-             * The viewport (if one was specified in the constructor) can also be dynamically "paused"
-             * and "resumed". The primary use case of this is to reduce CPU, memory, and power load
-             * when you need your vision pipeline running, but do not require a live preview on the
-             * robot controller screen. For instance, this could be useful if you wish to see the live
-             * camera preview as you are initializing your robot, but you no longer require the live
-             * preview after you have finished your initialization process; pausing the viewport does
-             * not stop running your pipeline.
-             *
-             * The "if" statements below will pause the viewport if the "X" button on gamepad1 is pressed,
-             * and resume the viewport if the "Y" button on gamepad1 is pressed.
-             */
-            else if(gamepad1.x)
-            {
-                webCam.pauseViewport();
-            }
-            else if(gamepad1.y)
-            {
-                webCam.resumeViewport();
             }
 
             /*
@@ -236,7 +194,7 @@ public class SkystoneRed extends LinearOpMode
         drive1.addPoint(90, 30, -180);
         drive1.addPoint(90, 42, -180);
 
-        runner.setPath(drive1, 0.55, 1);
+        runner.setPath(drive1, 1, 1);
         runner.start();
         while(runner.currentPoint() < 2 && opModeIsActive()) {
             idle();

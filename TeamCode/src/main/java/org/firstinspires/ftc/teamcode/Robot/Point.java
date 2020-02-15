@@ -5,7 +5,17 @@ public class Point {
     public double x;
     public double y;
     public double angle;
+    public double dynamicAngle = 0;
     public boolean hasAngle = false;
+    boolean hasDynamicAngle = false;
+
+    public double power;
+    public boolean hasPower = false;
+
+    public static enum AngleType{
+        DIRECT,
+        DYNAMIC
+    }
 
     public Point() {
 
@@ -19,6 +29,32 @@ public class Point {
     public Point(double x, double y, double angle) {
         hasAngle = true;
         this.angle = angle;
+        this.x = x;
+        this.y = y;
+    }
+
+    public Point(double x, double y, double angle, AngleType angleType) {
+        if (angleType==AngleType.DIRECT) {
+            hasAngle = true;
+            this.angle = angle;
+        } else if (angleType==AngleType.DYNAMIC) {
+            hasDynamicAngle = true;
+            dynamicAngle = angle;
+        }
+        this.x = x;
+        this.y = y;
+    }
+
+    public Point(double x, double y, double angle, AngleType angleType, double power) {
+        if (angleType==AngleType.DIRECT) {
+            hasAngle = true;
+            this.angle = angle;
+        } else if (angleType==AngleType.DYNAMIC) {
+            hasDynamicAngle = true;
+            dynamicAngle = angle;
+        }
+        this.power = power;
+        hasPower = true;
         this.x = x;
         this.y = y;
     }
@@ -69,5 +105,10 @@ public class Point {
         else {
             return false;
         }
+    }
+
+    public double distanceTo(Point point) {
+        Point relativePoint = point.subtract(this);
+        return Math.sqrt(Math.pow(relativePoint.x, 2) + Math.pow(relativePoint.y, 2));
     }
 }

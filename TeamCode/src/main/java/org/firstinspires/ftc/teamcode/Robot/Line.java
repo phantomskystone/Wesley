@@ -17,7 +17,8 @@ public class Line {
     }
     public Line(Point point1, Point point2) {
         if(point1.x == point2.x) {
-            slope = vertical;
+            point2.x+=0.1;
+            slope = (point2.y - point1.y) / (point2.x - point1.x);
         } else {
             slope = (point2.y - point1.y) / (point2.x - point1.x);
         }
@@ -34,7 +35,8 @@ public class Line {
     }
     public void setLine(Point point1, Point point2) {
         if(point1.x == point2.x) {
-            slope = vertical;
+            point2.x+=0.1;
+            slope = (point2.y - point1.y) / (point2.x - point1.x);
         } else {
             slope = (point2.y - point1.y) / (point2.x - point1.x);
         }
@@ -90,23 +92,25 @@ public class Line {
 
     //x=-2mb+- 2sqrt(-b2+r2m2+r2)  /  2m2+2
 
-    public Point pointAtDistance (Point point, Point towards, double radius) {
-        ArrayList<Point> points = new ArrayList<>();
+    public ArrayList<Point> pointAtDistance (Point point, Point towards, double radius) {
+        ArrayList<Point> intersections = new ArrayList<>();
+
         Point opt1 = new Point();
         Point opt2 = new Point();
+
         double a = pow(slope,2)+1;
         double b = 2*slope*intercept;
         double c = pow(intercept,2)-pow(radius,2);
+
         opt1.setX((-b+sqrt(pow(b,2)-(4*a*c)))/(2*a));
         opt1.setY(intercept+slope*opt1.x);
+
         opt2.setX((-b-sqrt(pow(b,2)-(4*a*c)))/(2*a));
         opt2.setY(intercept+slope*opt2.x);
-        if(hypot(opt1.subtract(towards).x, opt1.subtract(towards).y) < hypot(opt2.subtract(towards).x, opt2.subtract(towards).y)) {
-            return opt1;
-        } else if (hypot(opt1.subtract(towards).x, opt1.subtract(towards).y) > hypot(opt2.subtract(towards).x, opt2.subtract(towards).y)) {
-            return opt2;
-        } else {
-            return new Point(0,0);
-        }
+
+        intersections.add(opt1);
+        intersections.add(opt2);
+
+        return intersections;
     }
 }
