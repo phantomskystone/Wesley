@@ -24,15 +24,14 @@ public class Calibration extends LinearOpMode {
         waitForStart();
         robot.startPositionTracking();
         Path drive = new Path();
-        drive.addPoint(30,30);
-        drive.addPoint(0, 60);
-        robot.runPath(drive, 0.4, 1.0);
-        Point target = new Point();
-        Point pointOne = new Point(5,15);
-        Point pointTwo = new Point(10,20);
-        Point position = new Point(5,5);
-        target.setPoint(new Line(pointOne.subtract(position), pointTwo.subtract(position)).pointAtDistance(position, pointTwo, 15));
-        while(opModeIsActive()) {
-        }
+        drive.addPoint(0,30);
+        drive.addPoint(30, 30);
+        drive.addPoint(30,0);
+        drive.addPoint(0,0);
+        drive.addPoint(12,24);
+        drive.addPoint(0,36);
+        drive.addPoint(0,24);
+        drive.addPoint(30,24);
+        robot.runPath(drive, 0.4, 15);
     }
 }

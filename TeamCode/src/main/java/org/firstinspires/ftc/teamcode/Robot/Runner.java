@@ -17,6 +17,28 @@ public class Runner extends Thread {
         this.drift = drift;
     }
 
+    public void runPath(Path path, double power, double drift) {
+        this.path = path;
+        this.power = power;
+        this.drift = drift;
+        this.start();
+    }
+
+    public void waitForPoint(int point) {
+        while(currentPoint() < point) {
+            robot.opMode.idle();
+            if(!this.isAlive()) {
+                break;
+            }
+        }
+    }
+
+    public void waitForStop() {
+        while(this.isAlive()) {
+            robot.opMode.idle();
+        }
+    }
+
     public int currentPoint() {
         return robot.currentPoint;
     }

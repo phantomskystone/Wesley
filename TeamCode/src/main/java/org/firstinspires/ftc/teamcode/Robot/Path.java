@@ -11,6 +11,16 @@ public class Path {
         pointList.add(point);
     }
 
+    public void addPoint(double x, double y, double angle, Point.AngleType type) {
+        Point point = new Point(x, y, angle, type);
+        pointList.add(point);
+    }
+
+    public void addPoint(double x, double y, double angle, Point.AngleType type, double power) {
+        Point point = new Point(x, y, angle, type, power);
+        pointList.add(point);
+    }
+
     public void addPoint(double x, double y) {
         Point point = new Point(x, y);
         pointList.add(point);

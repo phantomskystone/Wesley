@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.teamcode.Robot.Config;
 import org.firstinspires.ftc.teamcode.Robot.Drive;
+import org.firstinspires.ftc.teamcode.Robot.Point;
 
 @TeleOp(name = "Phantom TeleOp")
 public class PhantomTeleOp extends LinearOpMode {
@@ -24,7 +25,7 @@ public class PhantomTeleOp extends LinearOpMode {
 
     boolean pressed = false;
 
-    double power = 0.5;
+    double power = 1.0;
 
 
     @Override
@@ -40,12 +41,14 @@ public class PhantomTeleOp extends LinearOpMode {
         Thread drivetrain = new Thread() {
             @Override
             public void run() {
+                Point dpad = new Point(0,0);
                 while(opModeIsActive()) {
                     side = (gamepad1.left_stick_x + gamepad1.right_stick_x) / -2;
-                    frontRight = -gamepad1.right_stick_y + side;
-                    backRight = -gamepad1.right_stick_y - side;
-                    frontLeft = -gamepad1.left_stick_y - side;
-                    backLeft = -gamepad1.left_stick_y + side;
+
+                    frontRight = -gamepad1.right_stick_y + side + dpad.y + dpad.x;
+                    backRight = -gamepad1.right_stick_y - side + dpad.y - dpad.x;
+                    frontLeft = -gamepad1.left_stick_y - side + dpad.y - dpad.x;
+                    backLeft = -gamepad1.left_stick_y + side + dpad.y + dpad.x;
 
                     robot.frontLeft.setPower(frontLeft*power);
                     robot.frontRight.setPower(frontRight*power);
@@ -119,8 +122,8 @@ public class PhantomTeleOp extends LinearOpMode {
             }
 
             if (grip) {
-                robot.leftGrip.setPosition(0.55);
-                robot.rightGrip.setPosition(0.45);
+                robot.leftGrip.setPosition(0.77);
+                robot.rightGrip.setPosition(0.33);
             }
             else {
                 robot.leftGrip.setPosition(0.87);
@@ -134,10 +137,10 @@ public class PhantomTeleOp extends LinearOpMode {
                 robot.foundationServo.setPosition(0.3);
             }
 
-            robot.leftBase.setPosition(-(Math.abs(position-0.28)+0.28) + 1);
-            robot.rightBase.setPosition((Math.abs(position-0.28)+0.28));
-            robot.leftStabilization.setPosition((Math.abs(position-0.28)+0.28)*1.13 - 0.07);
-            robot.rightStabilization.setPosition(-(Math.abs(position-0.28)+0.28)*1.13 + 1.07);
+            robot.leftBase.setPosition(-(Math.abs(position-0.28)+0.20) + 1);
+            robot.rightBase.setPosition((Math.abs(position-0.28)+0.20));
+            robot.leftStabilization.setPosition((Math.abs(position-0.28)+0.20)*1.15 - 0.07);
+            robot.rightStabilization.setPosition(-(Math.abs(position-0.28)+0.20)*1.15 + 1.07);
 
 
 
