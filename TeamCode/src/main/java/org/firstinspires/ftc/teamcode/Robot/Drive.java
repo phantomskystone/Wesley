@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.Robot;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import static java.lang.Math.*;
 import static org.firstinspires.ftc.teamcode.Robot.Line.vertical;
@@ -226,7 +227,7 @@ public class Drive extends Config {
 
             robotLine = pathLine.perpendicularThrough(robot);
 
-            stopPoint.setPoint(0.5 * velX * drift, 0.5 * velY * drift);
+            stopPoint.setPoint(0.02 * velX, 0.02 * velY);
 
             relativeLine.setLine(pointOne.subtract(robot), pointTwo.subtract(robot));
 
@@ -243,6 +244,7 @@ public class Drive extends Config {
             }
 
             target = target.add(robot);
+            target = target.subtract(stopPoint);
 
             errorPoint = target.subtract(robot);
             error = hypot(errorPoint.x, errorPoint.y);
@@ -297,22 +299,33 @@ public class Drive extends Config {
         double errX;
         double errY;
         double finishPower;
+        double integral = 0;
+        double derivative;
 
         runtime.reset();
 
+        ElapsedTime looptime = new ElapsedTime();
+
         while(!(pow(robot.x - pointTwo.x, 2) + pow(robot.y - pointTwo.y, 2) < 1) && !opMode.isStopRequested()
-                && !Thread.interrupted() && runtime.seconds() < 1) {
+                && !Thread.interrupted() && runtime.seconds() < 3) {
+
+            errX = robot.x - pointTwo.x;
+            errY = robot.y - pointTwo.y;
+
 
             if (pointTwo.hasDynamicAngle) {
                 dynamicAngle = pointTwo.angle;
-                setAngle = -toDegrees(atan2(errorPoint.y, errorPoint.x))+90 + pointTwo.dynamicAngle;
+                setAngle = -toDegrees(atan2(errY, errX))+90 + pointTwo.dynamicAngle;
             } else if (pointTwo.hasAngle) {
                 setAngle = pointTwo.angle;
             }
 
-            errX = robot.x - pointTwo.x;
-            errY = robot.y - pointTwo.y;
-            finishPower = sqrt(pow(errX, 2) + pow(errY, 2)) / 40;
+            error = hypot(errX, errY);
+            derivative = hypot(velX, velY);
+            integral += error*looptime.seconds();
+            looptime.reset();
+
+            finishPower = error/30 + 0.07*integral - derivative * 0.004;
             if (finishPower > power) {
                 finishPower = power;
             }

@@ -28,11 +28,12 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.Robot.Drive;
 import org.firstinspires.ftc.teamcode.Robot.Path;
+import org.firstinspires.ftc.teamcode.Robot.Point.AngleType;
 import org.firstinspires.ftc.teamcode.Robot.Runner;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfInt;
 import org.opencv.core.MatOfPoint;
-import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.RotatedRect;
@@ -48,6 +49,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static java.lang.Math.abs;
+import static java.lang.Math.atan;
+import static java.lang.Math.sin;
+import static java.lang.Math.tan;
+import static java.lang.Math.toRadians;
+
 @Autonomous(name="Skystone Blue")
 public class SkystoneBlue extends LinearOpMode
 {
@@ -58,19 +65,23 @@ public class SkystoneBlue extends LinearOpMode
 
     private ElapsedTime runtime = new ElapsedTime();
 
+    Rect Skystone = new Rect();
     Point StonePos = new Point(0,0);
-    enum SkyStone {
-        LEFT,
-        CENTER,
-        RIGHT;
-    }
-    SkyStone SkyStone;
+
+    double focalLength = 420;
+
+    double cameraHeight = 13;
+    double cameraAngle = 60;
+
+
+    double distance;
+    double translation;
+    double rotation;
 
     @Override
     public void runOpMode()
     {
         robot.init(hardwareMap);
-        SkyStone = SkyStone.CENTER;
 
         /*
          * Instantiate an OpenCvCamera object for the camera we'll be using.
@@ -84,7 +95,7 @@ public class SkystoneBlue extends LinearOpMode
         webCam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
 
         // OR...  Do Not Activate the Camera Monitor View
-        //webCam = OpenCvCameraFactory.getInstance().createInternalCamera(OpenCvInternalCamera.CameraDirection.BACK);
+        //webCam = OpenCvCameraFactory.getInstance().createInternalCamera(OpenCvInternalCamera.CameraDirection.BACK, cameraMonitorViewId);
 
         /*
          * Open the connection to the camera device
@@ -124,222 +135,120 @@ public class SkystoneBlue extends LinearOpMode
 
         setArm(0.19, false);
 
-        runtime.reset();
-
-        while (opModeIsActive())
-        {
-            /*
-             * Send some stats to the telemetry
-             */
-
-            if (StonePos.y > 210) {
-                SkyStone = SkyStone.LEFT;
-            }
-            if (StonePos.y < 210 && StonePos.y > 130) {
-                SkyStone = SkyStone.CENTER;
-            }
-            if (StonePos.y < 130) {
-                SkyStone = SkyStone.RIGHT;
-            }
-
-            telemetry.addData("Stone Position X", StonePos.x);
-            telemetry.addData("Stone Position Y", StonePos.y);
-            telemetry.addData("Position", SkyStone);
-            telemetry.update();
-
-            /*
-             * NOTE: stopping the stream from the camera early (before the end of the OpMode
-             * when it will be automatically stopped for you) *IS* supported. The "if" statement
-             * below will stop streaming from the camera when the "A" button on gamepad 1 is pressed.
-             */
-            if(runtime.seconds() > 3)
-            {
-                /*
-                 * IMPORTANT NOTE: calling stopStreaming() will indeed stop the stream of images
-                 * from the camera (and, by extension, stop calling your vision pipeline). HOWEVER,
-                 * if the reason you wish to stop the stream early is to switch use of the camera
-                 * over to, say, Vuforia or TFOD, you will also need to call closeCameraDevice()
-                 * (commented out below), because according to the Android Camera API documentation:
-                 *         "Your application should only have one Camera object active at a time for
-                 *          a particular hardware camera."
-                 *
-                 * NB: calling closeCameraDevice() will internally call stopStreaming() if applicable,
-                 * but it doesn't hurt to call it anyway, if for no other reason than clarity.
-                 *
-                 * NB2: if you are stopping the camera stream to simply save some processing power
-                 * (or battery power) for a short while when you do not need your vision pipeline,
-                 * it is recommended to NOT call closeCameraDevice() as you will then need to re-open
-                 * it the next time you wish to activate your vision pipeline, which can take a bit of
-                 * time. Of course, this comment is irrelevant in light of the use case described in
-                 * the above "important note".
-                 */
-                webCam.stopStreaming();
-                webCam.closeCameraDevice();
-                break;
-            }
-
-            /*
-             * The viewport (if one was specified in the constructor) can also be dynamically "paused"
-             * and "resumed". The primary use case of this is to reduce CPU, memory, and power load
-             * when you need your vision pipeline running, but do not require a live preview on the
-             * robot controller screen. For instance, this could be useful if you wish to see the live
-             * camera preview as you are initializing your robot, but you no longer require the live
-             * preview after you have finished your initialization process; pausing the viewport does
-             * not stop running your pipeline.
-             *
-             * The "if" statements below will pause the viewport if the "X" button on gamepad1 is pressed,
-             * and resume the viewport if the "Y" button on gamepad1 is pressed.
-             */
-            else if(gamepad1.x)
-            {
-                webCam.pauseViewport();
-            }
-            else if(gamepad1.y)
-            {
-                webCam.resumeViewport();
-            }
-
-            /*
-             * For the purposes of this sample, throttle ourselves to 10Hz loop to avoid burning
-             * excess CPU cycles for no reason. (By default, telemetry is only sent to the DS at 4Hz
-             * anyway). Of course in a real OpMode you will likely not want to do this.
-             */
-            sleep(100);
-
-
-        }
+        scanSkystone(1);
 
         Path drive1 = new Path();
         drive1.addPoint(0,8);
-        if (SkyStone == SkyStone.RIGHT) {
-            drive1.addPoint(-10,26, 45);
-            drive1.addPoint(-6, 38, 45);
-            drive1.addPoint(2, 54, 45);
-        }
-        if (SkyStone == SkyStone.CENTER) {
-            drive1.addPoint(-18,26, 45);
-            drive1.addPoint(-14, 38, 45);
-            drive1.addPoint(-6, 54, 45);
+        drive1.addPoint(translation+8, distance);
+        drive1.addPoint(translation-8, distance+24, 0, AngleType.DYNAMIC, 0.35);
+        drive1.addPoint(translation, 24, 180, AngleType.DYNAMIC, 0.75);
+        drive1.addPoint(-72,24, 180, AngleType.DYNAMIC, 1);
+        drive1.addPoint(-84, 24, 180, AngleType.DYNAMIC, 0.7);
+        drive1.addPoint(-84, 42);
 
-        }
-        if (SkyStone == SkyStone.LEFT) {
-            drive1.addPoint(-24,26, 45);
-            drive1.addPoint(-22, 34, 45);
-            drive1.addPoint(-14, 54, 45);
+        runner.runPath(drive1,0.65,10);
 
-        }
+        runner.waitForPoint(2);
 
-        drive1.addPoint(-14, 26, 90);
-        drive1.addPoint(-72, 26, 90);
-        drive1.addPoint(-88, 30, 180);
-        drive1.addPoint(-88, 42, 180);
-
-        runner.setPath(drive1, 0.55, 1);
-        runner.start();
-        while(runner.currentPoint() < 2 && opModeIsActive()) {
-            idle();
-        }
         robot.intake1.setPower(-0.7);
         robot.intake2.setPower(-0.7);
-        while(runner.currentPoint() < 5 && opModeIsActive()) {
-            idle();
-        }
+
+        runner.waitForPoint(4);
+
         robot.intake1.setPower(0);
         robot.intake2.setPower(0);
 
+        robot.foundationServo.setPosition(0.3);
+
+        runner.waitForPoint(7);
+
         setArm(0.24, true);
+        robot.foundationServo.setPosition(0);
 
-        sleep(500);
+        sleep(400);
 
-        setArm(0.24, false);
+        runner.stopPath();
 
-        while(runner.currentPoint() < 6 && opModeIsActive()) {
-            idle();
-        }
+        Path drive2 = new Path();
+        drive2.addPoint(-78, 20, 0, AngleType.DYNAMIC, 1.0);
+        drive2.addPoint(-60,20);
+        runner.runPath(drive2, 1.0, 10);
+
+
+        setArm(0.8, true);
+
+        sleep(800);
+
+        setArm(0.8, false);
+        sleep(100);
+        setArm(0.19, false);
+
+        runner.waitForStop();
 
         robot.foundationServo.setPosition(0.3);
 
-        while(runner.currentPoint() < 7 && opModeIsActive()) {
-            idle();
+        Path drive3 = new Path();
+        drive3.addPoint(-60, 24);
+        drive3.addPoint(-18,24);
+        drive3.addPoint(translation, 24, 55, AngleType.DIRECT, 0.65);
+        robot.runPath(drive3, 0.8, 10);
+
+        scanSkystone(0.1);
+
+        double xTravel = robot.x() + sin(toRadians(robot.getAngle()))*distance+8;
+
+        Path drive4 = new Path();
+
+        if (xTravel > 28) {
+            drive4.addPoint(xTravel-8, 24, 90, AngleType.DIRECT, 0.5);
+            drive4.addPoint(xTravel-18, 47, 90, AngleType.DIRECT, 0.5);
+            drive4.addPoint(32, 47, 90, AngleType.DIRECT, 0.5);
+            drive4.addPoint(0, 24, 180, AngleType.DYNAMIC, 1.0);
+            drive4.addPoint(-82, 24);
+        } else {
+            drive4.addPoint(xTravel, 24, 0, AngleType.DYNAMIC, 0.5);
+            drive4.addPoint(xTravel, 60);
+            drive4.addPoint(28, 60);
+            drive4.addPoint(0, 24, 180, AngleType.DYNAMIC, 1.0);
+            drive4.addPoint(-82, 24);
         }
+
+
+        runner.runPath(drive4,0.5,10);
+
+        robot.intake1.setPower(-0.7);
+        robot.intake2.setPower(-0.7);
+
+        runner.waitForPoint(4);
+
+        robot.intake1.setPower(0);
+        robot.intake2.setPower(0);
+
+        sleep(400);
+
+        setArm(0.24, false);
+
+        sleep(400);
 
         setArm(0.24, true);
         sleep(500);
         setArm(0.8, true);
 
-        robot.foundationServo.setPosition(0);
+        sleep(800);
 
-        sleep(1000);
         setArm(0.8, false);
         sleep(200);
         setArm(0.24, false);
-        sleep(500);
+        sleep(200);
 
         runner.stopPath();
-/*
-        Path drive2 = new Path();
-        drive2.addPoint(-88, 10);
-        robot.runPath(drive2, 0.55, 1);
-        robot.foundationServo.setPosition(0.025);
-        drive2.clear();
-        drive2.addPoint(-80, 12);
-        robot.runPath(drive2, 0.75, 1);
-        robot.foundationServo.setPosition(0);
-        sleep(500);
-        robot.turnTo(90);
-        runtime.reset();
-        while (runtime.seconds() < 2 && !isStopRequested()) {
-            robot.pointDrive(-96, 12, 0.75);
-        }
 
- */
-        while(robot.y() > 12 && opModeIsActive()) {
-            robot.frontLeft.setPower(0.5);
-            robot.frontRight.setPower(0.7);
-            robot.backLeft.setPower(0.5);
-            robot.backRight.setPower(0.7);
-        }
+        Path drive5 = new Path();
+        drive5.addPoint(-40, 24, 0, AngleType.DYNAMIC, 0.5);
+        robot.runPath(drive5, 0.5, 15);
 
-        while(robot.getAngle() > 90 && opModeIsActive()) {
-            robot.frontLeft.setPower(-0.3);
-            robot.frontRight.setPower(0.7);
-            robot.backLeft.setPower(-0.3);
-            robot.backRight.setPower(0.7);
-        }
-        runtime.reset();
-        while(runtime.seconds() < 0.5 && opModeIsActive()) {
-            robot.frontLeft.setPower(-0.5);
-            robot.frontRight.setPower(-0.5);
-            robot.backLeft.setPower(-0.5);
-            robot.backRight.setPower(-0.5);
-        }
-
-        robot.stop();
-        robot.setAngle(90);
-        robot.foundationServo.setPosition(0.3);
-        sleep(500);
-
-        Path drive3 = new Path();
-        drive3.addPoint(-72, 26, 90);
-        drive3.addPoint(-40, 26, 90);
-        robot.runPath(drive3, 0.65, 1);
     }
 
-    /*
-     * An example image processing pipeline to be run upon receipt of each frame from the camera.
-     * Note that the processFrame() method is called serially from the frame worker thread -
-     * that is, a new camera frame will not come in while you're still processing a previous one.
-     * In other words, the processFrame() method will never be called multiple times simultaneously.
-     *
-     * However, the rendering of your processed image to the viewport is done in parallel to the
-     * frame worker thread. That is, the amount of time it takes to render the image to the
-     * viewport does NOT impact the amount of frames per second that your pipeline can process.
-     *
-     * IMPORTANT NOTE: this pipeline is NOT invoked on your OpMode thread. It is invoked on the
-     * frame worker thread. This should not be a problem in the vast majority of cases. However,
-     * if you're doing something weird where you do need it synchronized with your OpMode thread,
-     * then you will need to account for that accordingly.
-     */
     class SamplePipeline extends OpenCvPipeline
     {
         /*
@@ -373,15 +282,32 @@ public class SkystoneBlue extends LinearOpMode
             /*
              * Draw a simple box around the middle 1/2 of the entire frame
              */
-            Mat kernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new  Size(20,20));
-            Mat kernel2 = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new  Size(5,5));
+            Mat kernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new  Size(5,5));
 
             Mat yellowFilter = new Mat();
             Imgproc.blur(input, yellowFilter, new Size(10,10));
             Imgproc.cvtColor(yellowFilter, yellowFilter, Imgproc.COLOR_BGR2HSV);
-            Scalar minYellow = new Scalar(90, 140, 100);
-            Scalar maxYellow = new Scalar(125, 255, 255);
+            Scalar minYellow = new Scalar(93, 60, 80);
+            Scalar maxYellow = new Scalar(117, 255, 255);
             Core.inRange(yellowFilter, minYellow, maxYellow, yellowFilter);
+            Imgproc.dilate(yellowFilter, yellowFilter, kernel);
+            Imgproc.dilate(yellowFilter, yellowFilter, kernel);
+            Imgproc.dilate(yellowFilter, yellowFilter, kernel);
+            Imgproc.dilate(yellowFilter, yellowFilter, kernel);
+            Imgproc.dilate(yellowFilter, yellowFilter, kernel);
+            Imgproc.dilate(yellowFilter, yellowFilter, kernel);
+            Imgproc.dilate(yellowFilter, yellowFilter, kernel);
+            Imgproc.dilate(yellowFilter, yellowFilter, kernel);
+            Imgproc.dilate(yellowFilter, yellowFilter, kernel);
+            Imgproc.dilate(yellowFilter, yellowFilter, kernel);
+            Imgproc.erode(yellowFilter, yellowFilter, kernel);
+            Imgproc.erode(yellowFilter, yellowFilter, kernel);
+            Imgproc.erode(yellowFilter, yellowFilter, kernel);
+            Imgproc.erode(yellowFilter, yellowFilter, kernel);
+            Imgproc.erode(yellowFilter, yellowFilter, kernel);
+            Imgproc.erode(yellowFilter, yellowFilter, kernel);
+            Imgproc.erode(yellowFilter, yellowFilter, kernel);
+            Imgproc.erode(yellowFilter, yellowFilter, kernel);
             List<MatOfPoint> contoursYellow = new ArrayList<>();
             Mat hierarchyYellow = new Mat();
             Imgproc.findContours(yellowFilter, contoursYellow, hierarchyYellow, Imgproc.RETR_CCOMP, Imgproc.CHAIN_APPROX_SIMPLE);
@@ -401,13 +327,39 @@ public class SkystoneBlue extends LinearOpMode
             Imgproc.medianBlur(input, blackFilter, 15);
             Imgproc.cvtColor(blackFilter, blackFilter, Imgproc.COLOR_BGR2HSV);
             Scalar minBlack = new Scalar(0, 0, 0);
-            Scalar maxBlack = new Scalar(255, 255, 25);
+            Scalar maxBlack = new Scalar(255, 255, 35);
             Core.inRange(blackFilter, minBlack, maxBlack, blackFilter);
             Imgproc.dilate(blackFilter, blackFilter, kernel);
-            Imgproc.erode(blackFilter, blackFilter, kernel2);
+            Imgproc.dilate(blackFilter, blackFilter, kernel);
+            Imgproc.dilate(blackFilter, blackFilter, kernel);
+            Imgproc.dilate(blackFilter, blackFilter, kernel);
+            Imgproc.dilate(blackFilter, blackFilter, kernel);
+            Imgproc.dilate(blackFilter, blackFilter, kernel);
+            Imgproc.dilate(blackFilter, blackFilter, kernel);
+            Imgproc.erode(blackFilter, blackFilter, kernel);
+            Imgproc.erode(blackFilter, blackFilter, kernel);
+            Imgproc.erode(blackFilter, blackFilter, kernel);
+            Imgproc.erode(blackFilter, blackFilter, kernel);
+            Imgproc.erode(blackFilter, blackFilter, kernel);
+            Imgproc.erode(blackFilter, blackFilter, kernel);
             List<MatOfPoint> contoursBlack = new ArrayList<>();
             Mat hierarchyBlack = new Mat();
             Imgproc.findContours(blackFilter, contoursBlack, hierarchyBlack, Imgproc.RETR_CCOMP, Imgproc.CHAIN_APPROX_SIMPLE);
+
+            List<MatOfPoint> hullList = new ArrayList<>();
+            for (MatOfPoint contour : contoursBlack) {
+                MatOfInt hull = new MatOfInt();
+                Imgproc.convexHull(contour, hull);
+                Point[] contourArray = contour.toArray();
+                Point[] hullPoints = new Point[hull.rows()];
+                List<Integer> hullContourIdxList = hull.toList();
+                for (int i = 0; i < hullContourIdxList.size(); i++) {
+                    hullPoints[i] = contourArray[hullContourIdxList.get(i)];
+                }
+                hullList.add(new MatOfPoint(hullPoints));
+            }
+
+
 
             if (hierarchyBlack.size().height > 0 && hierarchyBlack.size().width > 0)
             {
@@ -415,66 +367,70 @@ public class SkystoneBlue extends LinearOpMode
                 for (int idx = 0; idx >= 0; idx = (int) hierarchyBlack.get(0, idx)[0])
                 {
                     if (Imgproc.contourArea(contoursBlack.get(idx)) > 400) {
-                        Imgproc.drawContours(input, contoursBlack, idx, new Scalar(255, 0, 0));
+                        Imgproc.drawContours(input, hullList, idx, new Scalar(255, 0, 0));
                     }
                 }
             }
 
 
             double area = 0;
+            List<Rect> Skystones = new ArrayList<>();
             List<Rect> Stones = new ArrayList<>();
 
             for (MatOfPoint contour: contoursYellow) {
                 if (Imgproc.contourArea(contour) > 400) {
                     Rect rect = Imgproc.boundingRect(contour);
-                    if (rect.area() > area) {
-                        area = rect.area();
-                        Stones.add(rect);
-                    }
-                    Imgproc.rectangle(input, rect, new Scalar(0,255,0), 2);
+                    Stones.add(rect);
+                    //Imgproc.rectangle(input, rect, new Scalar(0,255,0), 1);
                 }
             }
 
-            double skyStoneArea = 0;
             for (MatOfPoint contour: contoursBlack) {
                 if (Imgproc.contourArea(contour) > 400) {
-                    RotatedRect rotatedRect = Imgproc.minAreaRect(new MatOfPoint2f(contour.toArray()));
+                    //RotatedRect rotatedRect = Imgproc.minAreaRect(new MatOfPoint2f(contour.toArray()));
+                    Rect rect = Imgproc.boundingRect(contour);
                     for(Rect Stone : Stones) {
-                        if (rotatedRect.center.inside(Stone) || true) {
-                            if (rotatedRect.boundingRect().area() > skyStoneArea) {
-                                drawRotatedRect(input, rotatedRect, new Scalar(255, 0, 0), 2);
-                                StonePos = rotatedRect.center;
-                                skyStoneArea = rotatedRect.boundingRect().area();
+                        if (new Point(rect.x + rect.width/2, rect.y + rect.height/2).inside(Stone)) {
+                            //drawRotatedRect(input, rotatedRect, new Scalar(255, 0, 0), 2);
+                            Imgproc.rectangle(input, rect, new Scalar(255,0,0), 2);
+                            if (rect.area() > area) {
+                                Skystone = rect;
+                                StonePos = new Point(rect.x + rect.width / 2, rect.y + rect.height / 2);
+                                area = rect.area();
                             }
                         }
                     }
                 }
             }
 
-            /*Imgproc.rectangle(
-                    input,
-                    new Point(
-                            input.cols()/4,
-                            input.rows()/4),
-                    new Point(
-                            input.cols()*(3f/4f),
-                            input.rows()*(3f/4f)),
-                    new Scalar(0, 255, 0), 4);
+/*
 
-            /**
-             * NOTE: to see how to get data from your pipeline to your OpMode as well as how
-             * to change which stage of the pipeline is rendered to the viewport when it is
-             * tapped, please see {@link PipelineStageSwitchingExample}
-             */
+            Mat edges = new Mat();
+            Mat Lines = new Mat();
 
+            Imgproc.cvtColor(input, edges, Imgproc.COLOR_BGR2GRAY);
+            Imgproc.blur(edges, edges, new Size(4,4));
+            Imgproc.Canny(edges, edges, 30, 20*3);
+
+            Imgproc.HoughLines(edges, Lines, 2, PI/180, 150);
+            for (int x = 0; x < Lines.rows(); x++) {
+                double rho = Lines.get(x, 0)[0],
+                        theta = Lines.get(x, 0)[1];
+                double a = cos(theta), b = sin(theta);
+                double x0 = a*rho, y0 = b*rho;
+                Point pt1 = new Point(round(x0 + 1000*(-b)), round(y0 + 1000*(a)));
+                Point pt2 = new Point(round(x0 - 1000*(-b)), round(y0 - 1000*(a)));
+                Imgproc.line(input, pt1, pt2, new Scalar(0, 0, 255), 3, Imgproc.LINE_AA, 0);
+            }
+*/
             return input;
         }
     }
     public void setArm(double position, boolean grip) {
-        robot.leftBase.setPosition(-(Math.abs(position-0.24)+0.24) + 1);
-        robot.rightBase.setPosition((Math.abs(position-0.24)+0.24));
-        robot.leftStabilization.setPosition((Math.abs(position-0.24)+0.24)*1.13 - 0.07);
-        robot.rightStabilization.setPosition(-(Math.abs(position-0.24)+0.24)*1.13 + 1.07);
+        robot.leftBase.setPosition(-(abs(position-0.24)+0.24) + 1);
+        robot.rightBase.setPosition((abs(position-0.24)+0.24));
+        robot.leftStabilization.setPosition((abs(position-0.24)+0.24)*1.13 - 0.07);
+        robot.rightStabilization.setPosition(-(abs(position-0.24)+0.24)*1.13 + 1.07);
         if (grip) {
             robot.leftGrip.setPosition(0.55);
             robot.rightGrip.setPosition(0.45);
@@ -482,6 +438,37 @@ public class SkystoneBlue extends LinearOpMode
         else {
             robot.leftGrip.setPosition(0.87);
             robot.rightGrip.setPosition(0.07);
+        }
+    }
+
+    public void scanSkystone(double time) {
+
+        runtime.reset();
+
+        while (opModeIsActive()) {
+            /*
+             * Send some stats to the telemetry
+             */
+
+            distance = tan(atan((120 - Skystone.x - Skystone.width) / focalLength) + toRadians(cameraAngle)) * cameraHeight;
+            translation = ((160 - StonePos.y) / focalLength) * distance * 1.1 + 1;
+
+
+            telemetry.addData("Stone Position X", StonePos.x);
+            telemetry.addData("Stone Position Y", StonePos.y);
+            telemetry.addData("distance", distance);
+            telemetry.addData("distancereal", distance);
+            telemetry.addData("translation", translation);
+            telemetry.addData("rotation", rotation);
+            telemetry.addData("width", Skystone.height);
+            telemetry.update();
+
+
+            if (runtime.seconds() > time) {
+                break;
+            }
+
+
         }
     }
 }

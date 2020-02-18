@@ -35,15 +35,8 @@ public class Config {
     public Servo foundationServo = null;
     public BNO055IMU imu      = null;
     HardwareMap hwMap = null;
-    boolean IMU=false;
 
     public BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
-
-    public Orientation             lastAngles = new Orientation();
-
-
-    public double                  globalAngle;
-
 
     public Config() {}
 
@@ -103,7 +96,7 @@ public class Config {
 
     }
 
-    public void doIMU(){
+    public void InitializeIMUParameters(){
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
         parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
         parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
