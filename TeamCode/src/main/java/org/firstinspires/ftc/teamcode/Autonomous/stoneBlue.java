@@ -22,6 +22,7 @@
 package org.firstinspires.ftc.teamcode.Autonomous;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -56,6 +57,7 @@ import static java.lang.Math.tan;
 import static java.lang.Math.toRadians;
 
 @Autonomous(name="cv skystone blue")
+@Disabled
 public class stoneBlue extends LinearOpMode
 {
     Drive robot = new Drive(this);
@@ -139,14 +141,14 @@ public class stoneBlue extends LinearOpMode
 
         Path drive1 = new Path();
         drive1.addPoint(0,8);
-        drive1.addPoint(translation-12, 30);
-        drive1.addPoint(translation+12, 54, 0, AngleType.DYNAMIC, 0.35);
-        drive1.addPoint(translation, 24, -180, AngleType.DYNAMIC, 0.75);
-        drive1.addPoint(72,24, -180, AngleType.DYNAMIC, 1);
-        drive1.addPoint(84, 24, -180, AngleType.DYNAMIC, 0.8);
-        drive1.addPoint(84, 42);
+        drive1.addPoint(translation+8, distance);
+        drive1.addPoint(translation-8, distance+24, 0, AngleType.DYNAMIC, 0.35);
+        drive1.addPoint(translation, 24, 180, AngleType.DYNAMIC, 0.75);
+        drive1.addPoint(-72,24, 180, AngleType.DYNAMIC, 1);
+        drive1.addPoint(-84, 24, 180, AngleType.DYNAMIC, 0.7);
+        drive1.addPoint(-84, 42);
 
-        runner.runPath(drive1,0.65,15);
+        runner.runPath(drive1,0.65,10);
 
         runner.waitForPoint(2);
 
@@ -170,16 +172,17 @@ public class stoneBlue extends LinearOpMode
         runner.stopPath();
 
         Path drive2 = new Path();
-        drive2.addPoint(78, 20, 0, AngleType.DYNAMIC, 1.0);
-        drive2.addPoint(54,20);
-        runner.runPath(drive2, 1.0, 15);
+        drive2.addPoint(-78, 20, 0, AngleType.DYNAMIC, 1.0);
+        drive2.addPoint(-60,20);
+        runner.runPath(drive2, 1.0, 10);
 
-        setArm(0.7, true);
+
+        setArm(0.8, true);
 
         sleep(800);
 
-        setArm(0.7, false);
-        sleep(50);
+        setArm(0.8, false);
+        sleep(100);
         setArm(0.19, false);
 
         runner.waitForStop();
@@ -187,33 +190,33 @@ public class stoneBlue extends LinearOpMode
         robot.foundationServo.setPosition(0.3);
 
         Path drive3 = new Path();
-        drive3.addPoint(54, 24);
-        drive3.addPoint(18,24);
-        drive3.addPoint(translation-12, 18, -55, AngleType.DIRECT, 0.65);
-        robot.runPath(drive3, 0.8, 15);
+        drive3.addPoint(-60, 24);
+        drive3.addPoint(-18,24);
+        drive3.addPoint(translation, 24, 55, AngleType.DIRECT, 0.65);
+        robot.runPath(drive3, 0.8, 10);
 
-        scanSkystone(0.5);
+        scanSkystone(0.1);
 
-        double xTravel = robot.x() + sin(toRadians(robot.getAngle()))*distance-8;
+        double xTravel = robot.x() + sin(toRadians(robot.getAngle()))*distance+8;
 
         Path drive4 = new Path();
 
-        if (xTravel < -28) {
-            drive4.addPoint(xTravel+4, 24, -90, AngleType.DIRECT, 0.5);
-            drive4.addPoint(xTravel+18, 54, -90, AngleType.DIRECT, 0.5);
-            drive4.addPoint(-34, 54, -90, AngleType.DIRECT, 0.5);
+        if (xTravel > 28) {
+            drive4.addPoint(xTravel-8, 24, 90, AngleType.DIRECT, 0.5);
+            drive4.addPoint(xTravel-18, 47, 90, AngleType.DIRECT, 0.5);
+            drive4.addPoint(32, 47, 90, AngleType.DIRECT, 0.5);
             drive4.addPoint(0, 24, 180, AngleType.DYNAMIC, 1.0);
-            drive4.addPoint(82, 24);
+            drive4.addPoint(-82, 24);
         } else {
             drive4.addPoint(xTravel, 24, 0, AngleType.DYNAMIC, 0.5);
             drive4.addPoint(xTravel, 60);
-            drive4.addPoint(-32, 60);
+            drive4.addPoint(28, 60);
             drive4.addPoint(0, 24, 180, AngleType.DYNAMIC, 1.0);
-            drive4.addPoint(82, 24);
+            drive4.addPoint(-82, 24);
         }
 
 
-        runner.runPath(drive4,0.5,15);
+        runner.runPath(drive4,0.5,10);
 
         robot.intake1.setPower(-0.7);
         robot.intake2.setPower(-0.7);
@@ -223,7 +226,7 @@ public class stoneBlue extends LinearOpMode
         robot.intake1.setPower(0);
         robot.intake2.setPower(0);
 
-        sleep(600);
+        sleep(400);
 
         setArm(0.24, false);
 
@@ -238,11 +241,12 @@ public class stoneBlue extends LinearOpMode
         setArm(0.8, false);
         sleep(200);
         setArm(0.24, false);
+        sleep(200);
 
         runner.stopPath();
 
         Path drive5 = new Path();
-        drive5.addPoint(36, 24, 0, AngleType.DYNAMIC, 0.5);
+        drive5.addPoint(-40, 24, 0, AngleType.DYNAMIC, 0.5);
         robot.runPath(drive5, 0.5, 15);
 
     }
@@ -449,7 +453,7 @@ public class stoneBlue extends LinearOpMode
              */
 
             distance = tan(atan((120 - Skystone.x - Skystone.width) / focalLength) + toRadians(cameraAngle)) * cameraHeight;
-            translation = ((160 - StonePos.y) / focalLength) * distance * 1.1 - 2;
+            translation = ((160 - StonePos.y) / focalLength) * distance * 1.1 + 1;
 
 
             telemetry.addData("Stone Position X", StonePos.x);
