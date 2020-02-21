@@ -18,13 +18,6 @@ public class basic_oton extends LinearOpMode {
     public void runOpMode() {
         robot.init(hardwareMap);
         robot.foundationServo.setPosition(0);
-        robot.doIMU();
-        telemetry.addData("IMU status", "calibrating");
-        telemetry.update();
-        while(opModeIsActive() && !robot.imu.isGyroCalibrated()) {
-            sleep(50);
-            idle();
-        }
         telemetry.addData("imu status", "calibrated done, waiting for start");
         telemetry.update();
         waitForStart();

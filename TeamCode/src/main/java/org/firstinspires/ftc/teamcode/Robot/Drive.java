@@ -52,6 +52,9 @@ public class Drive extends Config {
     double COUNTS_PER_REVOLUTION = 1440/1.5;
     double WHEEL_DIAMETER_INCHES = 1.5;
 
+    double slipFactorY;
+    double slipFactorX;
+
     //calculate distance based on encoder counts
     public double encoderDistanceY1() {
         //The encoder will be plugged into the same port as the frontLeft motor
