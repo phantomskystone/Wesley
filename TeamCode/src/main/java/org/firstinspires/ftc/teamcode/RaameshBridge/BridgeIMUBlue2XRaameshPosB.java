@@ -7,8 +7,8 @@ import org.firstinspires.ftc.teamcode.RaameshBridge.IMURedux;
 import org.firstinspires.ftc.teamcode.RaameshBridge.PhantomConfig4200X;
 import org.firstinspires.ftc.teamcode.RaameshBridge.proto.BlueAuto;
 
-@Disabled
-@Autonomous(name="BlueFoundationSide (Ends Away From Wall)",group="autonomous")
+
+@Autonomous(name="Bad Blue Foundation Away (DO NOT USE)",group="autonomous")
 public final class BridgeIMUBlue2XRaameshPosB extends BlueAuto {
 
     PhantomConfig4200X robot = new PhantomConfig4200X();

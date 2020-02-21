@@ -12,8 +12,8 @@ import org.firstinspires.ftc.teamcode.RaameshBridge.proto.RedAuto;
 //Commented by Raamesh Balabharapatruni
 
 @SuppressWarnings("MagicConstant")
-@Disabled
-@Autonomous(name="RedFoundationSide (Ends Away From Wall)",group="autonomous")
+
+@Autonomous(name="Bad Red Foundation Away (DO NOT USE)",group="autonomous")
 public final class BridgeIMU2XRaameshPosB extends RedAuto {
 
     PhantomConfig4200X robot = new PhantomConfig4200X();

@@ -12,7 +12,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 
 
-@Autonomous(name="Just Parking Autonomous")
+@Autonomous(name="Just Parking")
 public class JustPark extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
