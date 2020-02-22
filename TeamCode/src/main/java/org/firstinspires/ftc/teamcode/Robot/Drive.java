@@ -310,7 +310,7 @@ public class Drive extends Config {
         ElapsedTime looptime = new ElapsedTime();
 
         while(!(pow(robot.x - pointTwo.x, 2) + pow(robot.y - pointTwo.y, 2) < 1) && !opMode.isStopRequested()
-                && !Thread.interrupted() && runtime.seconds() < 3) {
+                && !Thread.interrupted() && runtime.seconds() < 2) {
 
             errX = robot.x - pointTwo.x;
             errY = robot.y - pointTwo.y;
