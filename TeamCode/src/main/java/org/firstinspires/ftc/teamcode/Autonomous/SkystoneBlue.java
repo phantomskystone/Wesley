@@ -143,8 +143,8 @@ public class SkystoneBlue extends LinearOpMode
         drive1.addPoint(translation-8, distance+24, 0, AngleType.DYNAMIC, 0.35);
         drive1.addPoint(translation, 24, 180, AngleType.DYNAMIC, 0.75);
         drive1.addPoint(-72,24, 180, AngleType.DYNAMIC, 1);
-        drive1.addPoint(-84, 24, 180, AngleType.DYNAMIC, 0.7);
-        drive1.addPoint(-84, 42);
+        drive1.addPoint(-86, 24, 180, AngleType.DYNAMIC, 0.7);
+        drive1.addPoint(-86, 42);
 
         runner.runPath(drive1,0.65,10);
 
