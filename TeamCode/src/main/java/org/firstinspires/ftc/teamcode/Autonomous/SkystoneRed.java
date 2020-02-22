@@ -142,8 +142,8 @@ public class SkystoneRed extends LinearOpMode
         drive1.addPoint(translation+8, distance+24, 0, AngleType.DYNAMIC, 0.35);
         drive1.addPoint(translation, 24, 180, AngleType.DYNAMIC, 0.75);
         drive1.addPoint(72,24, 180, AngleType.DYNAMIC, 1);
-        drive1.addPoint(84, 24, 180, AngleType.DYNAMIC, 0.7);
-        drive1.addPoint(84, 42);
+        drive1.addPoint(86, 24, 180, AngleType.DYNAMIC, 0.7);
+        drive1.addPoint(86, 42);
 
         runner.runPath(drive1,0.65,10);
 
@@ -169,8 +169,8 @@ public class SkystoneRed extends LinearOpMode
         runner.stopPath();
 
         Path drive2 = new Path();
-        drive2.addPoint(78, 20, 0, AngleType.DYNAMIC, 1.0);
-        drive2.addPoint(60,20);
+        drive2.addPoint(80, 20, 0, AngleType.DYNAMIC, 1.0);
+        drive2.addPoint(62,20);
         runner.runPath(drive2, 1.0, 10);
 
 
@@ -187,18 +187,19 @@ public class SkystoneRed extends LinearOpMode
         robot.foundationServo.setPosition(0.3);
 
         Path drive3 = new Path();
-        drive3.addPoint(60, 26);
+        drive3.addPoint(62, 26);
         drive3.addPoint(18,26);
         drive3.addPoint(translation, 24, -55, AngleType.DIRECT, 0.65);
         robot.runPath(drive3, 0.8, 10);
 
         scanSkystone(0.1);
 
-        double xTravel = robot.x() + sin(toRadians(robot.getAngle()))*distance-4;
+        double xTravel = robot.x() + sin(toRadians(robot.getAngle()))*distance-6;
 
         Path drive4 = new Path();
 
         if (xTravel < -24) {
+            xTravel = -28;
             drive4.addPoint(xTravel+8, 24, -90, AngleType.DIRECT, 0.5);
             drive4.addPoint(xTravel+18, 47, -90, AngleType.DIRECT, 0.5);
             drive4.addPoint(-32, 47, -90, AngleType.DIRECT, 0.5);
