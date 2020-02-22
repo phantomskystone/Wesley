@@ -198,7 +198,7 @@ public class SkystoneRed extends LinearOpMode
 
         Path drive4 = new Path();
 
-        if (xTravel < -24) {
+        if (xTravel < -26) {
             xTravel = -28;
             drive4.addPoint(xTravel+8, 24, -90, AngleType.DIRECT, 0.5);
             drive4.addPoint(xTravel+18, 47, -90, AngleType.DIRECT, 0.5);
